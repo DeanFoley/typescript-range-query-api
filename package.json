@@ -1,6 +1,6 @@
 {
   "name": "petsapp-test",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "",
   "scripts": {
     "build": "rm -rf dist/ && tsc",
@@ -9,17 +9,22 @@
     "exec:parse": "npm run build && node dist/main.js -p",
     "exec:stringify": "npm run build && node dist/main.js -s",
     "demo:parse": "npm run exec:parse -- now+3y/M",
-    "demo:stringify": "npm run exec:stringify -- '2026-06-01T09:45:00.000Z'"
+    "demo:stringify": "npm run exec:stringify -- '2026-06-01T09:45:00.000Z'",
+    "serve": "ts-node src/api.ts"
   },
   "author": "Dean Foley",
   "license": "ISC",
   "devDependencies": {
     "@jest/globals": "^29.5.0",
+    "@types/express": "^4.17.17",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.11",
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.3"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
   }
 }

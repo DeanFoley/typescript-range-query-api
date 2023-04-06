@@ -30,6 +30,7 @@ describe('parse testing', () => {
         { name: 'add 1 week', query: 'now+1w', expected: new Date('2020-05-08T00:00:00.000Z') },
         { name: 'subtract 7 weeks, rounded to nearest month', query: 'now-7w/M', expected: new Date('2020-03-01T00:00:00.000Z') },
         { name: 'add 4 days, round to the nearest week', query: 'now+4d/w', expected: new Date('2020-05-03T00:00:00.000Z') },
+        { name: 'subtract 2 days, round to the nearest week', query: 'now-2d/w', expected: new Date('2020-05-03T00:00:00.000Z') },
         { name: 'subtract 25 minutes', query: 'now-25m', expected: new Date('2020-04-30T23:35:00.000Z') },
         { name: 'add 25 minutes', query: 'now+25m', expected: new Date('2020-05-01T00:25:00.000Z') },
         { name: 'subtract 40 seconds', query: 'now-40s', expected: new Date('2020-04-30T23:59:20.000Z') },

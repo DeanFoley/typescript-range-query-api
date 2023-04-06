@@ -10,7 +10,17 @@ enum TimeUnit {
 
 type DateString = String;
 
+interface ParseRequest {
+    dateString: DateString;
+}
+
+interface StringifyRequest {
+    date: Date
+}
+
 export {
     TimeUnit,
-    DateString
+    DateString,
+    ParseRequest,
+    StringifyRequest
 }
