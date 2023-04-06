@@ -6,146 +6,108 @@ const MS_IN_WEEK: number = MS_IN_DAY * 7;
 const MS_IN_YEAR: number = MS_IN_DAY * 365;
 const MS_IN_MONTH: number = MS_IN_YEAR / 12;
 
-const stringify = (date: Date): String => {
-    let dateString: String = 'now';
+import { TimeUnit, DateString } from './types'
 
-    const now = new Date();
+let dateString: string;
+let differenceInMs: number;
+let leapOffset: number;
+let isCurrentLeapYear: boolean;
 
-    let differenceInMs: number = date.getTime() - now.getTime();
+const stringify = (date: Date): DateString => {
+    try {
+        if (!valiDate(date)) {
+            throw new Error("not a valid date!")
+        }
 
-    const leapOffset: number = now.getFullYear() % 4;
-    const isCurrentLeapYear: boolean = leapOffset == 0
+        dateString = 'now';
 
-    // calc years
-    let yearDiff: number = differenceInMs / MS_IN_YEAR
-    if (yearDiff <= -1) {
-        const wholeYears: number = Math.ceil(yearDiff)
-        dateString = dateString.concat(wholeYears + "y")
-        differenceInMs = differenceInMs - (wholeYears * MS_IN_YEAR);
-    } else if (yearDiff >= 1) {
-        const wholeYears: number = Math.floor(yearDiff)
-        dateString = dateString.concat("+" + wholeYears + "y")
-        differenceInMs = differenceInMs - (wholeYears * MS_IN_YEAR);
-    }
+        const now = new Date();
 
-    if (doneChecker(differenceInMs)) {
+        differenceInMs = date.getTime() - now.getTime();
+
+        leapOffset = now.getFullYear() % 4;
+        isCurrentLeapYear = leapOffset == 0
+
+        // calc years
+        let diff: number = timeCalculator(MS_IN_YEAR, TimeUnit.Year)
+        if (doneChecker(differenceInMs)) {
+            return dateString
+        }
+
+        // calc leap years
+        if (isCurrentLeapYear && diff < -1) {
+            differenceInMs += MS_IN_DAY
+        } else if (isCurrentLeapYear && diff > 1) {
+            differenceInMs -= MS_IN_DAY
+        }
+        let leaps: number = diff / -4
+        if (leaps > 1) {
+            differenceInMs += MS_IN_DAY * Math.floor(leaps)
+        }
+        leaps = diff / 4
+        if (leaps > 2) {
+            differenceInMs -= MS_IN_DAY * Math.floor(leaps - 1)
+        }
+
+        // calc months
+        timeCalculator(MS_IN_MONTH, TimeUnit.Month)
+        if (doneChecker(differenceInMs)) {
+            return dateString
+        }
+
+        // calc weeks
+        timeCalculator(MS_IN_WEEK, TimeUnit.Week)
+        if (doneChecker(differenceInMs)) {
+            return dateString
+        }
+
+        // calc days
+        timeCalculator(MS_IN_DAY, TimeUnit.Day)
+        if (doneChecker(differenceInMs)) {
+            return dateString
+        }
+
+        // calc hours
+        timeCalculator(MS_IN_HOUR, TimeUnit.Hour)
+        if (doneChecker(differenceInMs)) {
+            return dateString
+        }
+
+        // calc minutes
+        timeCalculator(MS_IN_MINUTE, TimeUnit.Minute)
+        if (doneChecker(differenceInMs)) {
+            return dateString
+        }
+        
+        // calc seconds
+        timeCalculator(MS_IN_SECOND, TimeUnit.Second)
+
         return dateString
+    } catch (error) {
+        throw error
     }
-
-    if (isCurrentLeapYear && yearDiff < -1) {
-        differenceInMs += MS_IN_DAY
-    } else if (isCurrentLeapYear && yearDiff > 1) {
-        differenceInMs -= MS_IN_DAY
-    }
-
-    let leaps: number = yearDiff / -4
-    if (leaps > 1) {
-        differenceInMs += MS_IN_DAY * Math.floor(leaps)
-    }
-
-    leaps = yearDiff / 4
-    if (leaps > 2) {
-        differenceInMs -= MS_IN_DAY * Math.floor(leaps - 1)
-    }
-
-    // calc months
-    const monthDiff: number = differenceInMs / MS_IN_MONTH
-    if (monthDiff <= -1) {
-        const wholeMonths: number = Math.ceil(monthDiff)
-        dateString = dateString.concat(wholeMonths + "M")
-        differenceInMs = differenceInMs - (wholeMonths * MS_IN_MONTH);
-    } else if (monthDiff >= 1) {
-        const wholeMonths: number = Math.floor(monthDiff)
-        dateString = dateString.concat("+" + wholeMonths + "M")
-        differenceInMs = differenceInMs - (wholeMonths * MS_IN_MONTH);
-    }
-
-    if (doneChecker(differenceInMs)) {
-        return dateString
-    }
-
-    // calc weeks
-    const weekDiff: number = differenceInMs / MS_IN_WEEK;
-    if (weekDiff <= -1) {
-        const wholeWeeks: number = Math.ceil(weekDiff)
-        dateString = dateString.concat(wholeWeeks + "w")
-        differenceInMs = differenceInMs - (wholeWeeks * MS_IN_WEEK);
-    } else if (weekDiff >= 1) {
-        const wholeWeeks: number = Math.floor(weekDiff)
-        dateString = dateString.concat("+" + wholeWeeks + "w")
-        differenceInMs = differenceInMs - (wholeWeeks * MS_IN_WEEK);
-    }
-
-    if (doneChecker(differenceInMs)) {
-        return dateString
-    }
-
-    // calc days
-    const dayDiff: number = differenceInMs / MS_IN_DAY;
-    if (dayDiff <= -1) {
-        const wholeDays: number = Math.ceil(dayDiff)
-        dateString = dateString.concat(wholeDays + "d")
-        differenceInMs = differenceInMs - (wholeDays * MS_IN_DAY);
-    } else if (dayDiff >= 1) {
-        const wholeDays: number = Math.floor(dayDiff)
-        dateString = dateString.concat("+" + wholeDays + "d")
-        differenceInMs = differenceInMs - (wholeDays * MS_IN_DAY);
-    }
-
-    if (doneChecker(differenceInMs)) {
-        return dateString
-    }
-
-    // calc hours
-    const hourDiff: number = differenceInMs / MS_IN_HOUR;
-    if (hourDiff <= -1) {
-        const wholeHours: number = Math.ceil(hourDiff)
-        dateString = dateString.concat(wholeHours + "h")
-        differenceInMs = differenceInMs - (wholeHours * MS_IN_HOUR);
-    } else if (hourDiff >= 1) {
-        const wholeHours: number = Math.floor(hourDiff)
-        dateString = dateString.concat("+" + wholeHours + "h")
-        differenceInMs = differenceInMs - (wholeHours * MS_IN_HOUR);
-    }
-
-    if (doneChecker(differenceInMs)) {
-        return dateString
-    }
-
-    // calc minutes
-    const minuteDiff: number = differenceInMs / MS_IN_MINUTE;
-    if (minuteDiff <= -1) {
-        const wholeMinutes: number = Math.ceil(minuteDiff)
-        dateString = dateString.concat(wholeMinutes + "m")
-        differenceInMs = differenceInMs - (wholeMinutes * MS_IN_MINUTE);
-    } else if (minuteDiff >= 1) {
-        const wholeMinutes: number = Math.floor(minuteDiff)
-        dateString = dateString.concat("+" + Math.floor(minuteDiff) + "m")
-        differenceInMs = differenceInMs - (wholeMinutes * MS_IN_MINUTE);
-    }
-
-    if (doneChecker(differenceInMs)) {
-        return dateString
-    }
-    
-    // calc seconds
-    const secondDiff: number = differenceInMs / MS_IN_SECOND;
-    if (secondDiff < -1) {
-        const wholeSeconds: number = Math.ceil(secondDiff)
-        dateString = dateString.concat(wholeSeconds + "m")
-        differenceInMs = differenceInMs - (wholeSeconds * MS_IN_MINUTE);
-    } else if (secondDiff > 1) {
-        const wholeSeconds: number = Math.floor(secondDiff)
-        dateString = dateString.concat("+" + wholeSeconds + "m")
-        differenceInMs = differenceInMs - (wholeSeconds * MS_IN_MINUTE);
-    }
-
-
-    return dateString
 }
 
 const doneChecker = (ms: number): boolean => {
     return ms == 0
+}
+
+const timeCalculator = (timeUnit: number, timeString: string): number => {
+    const diff: number = differenceInMs / timeUnit;
+    if (diff <= -1) {
+        const wholeUnit: number = Math.ceil(diff)
+        dateString = dateString.concat(wholeUnit + timeString)
+        differenceInMs = differenceInMs - (wholeUnit * timeUnit);
+    } else if (diff >= 1) {
+        const wholeUnit: number = Math.floor(diff)
+        dateString = dateString.concat("+" + wholeUnit + timeString)
+        differenceInMs = differenceInMs - (wholeUnit * timeUnit);
+    }
+    return diff
+}
+
+const valiDate = (date: Date): boolean => {
+    return date instanceof Date && !isNaN(date.getTime());
 }
 
 export { stringify }
